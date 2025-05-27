@@ -1,8 +1,11 @@
+
 import React, { useEffect, useState } from "react";
 import axios from "../services/axios";
 import { useDispatch } from "react-redux";
 import { logout } from "../features/auth/authSlice";
-import "../styles/App.css";
+import TaskList from "../components/organisms/TaskList";
+import TabBar from "../components/molecules/TabBar";
+import ModalConfirmDelete from "../components/molecules/ModalConfirmDelete";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("all");
@@ -20,7 +23,8 @@ export default function Dashboard() {
     }
   };
 
-  const handleAddTask = async () => {
+  const handleAddTask = async (e) => {
+    e.preventDefault();
     if (!newTask.trim()) return;
     try {
       await axios.post("/tasks", { description: newTask });
@@ -75,81 +79,28 @@ export default function Dashboard() {
         </button>
       </div>
 
-      <input
-        type="text"
-        placeholder="Nova tarefa..."
-        value={newTask}
-        onChange={(e) => setNewTask(e.target.value)}
+      <form onSubmit={handleAddTask}>
+        <input
+          type="text"
+          placeholder="Nova tarefa..."
+          value={newTask}
+          onChange={(e) => setNewTask(e.target.value)}
+        />
+        <button type="submit">Adicionar</button>
+      </form>
+
+      <TabBar activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      <TaskList tasks={filteredTasks()} onToggle={toggleTask} onDelete={setTaskToDelete} />
+
+      <ModalConfirmDelete
+        task={taskToDelete}
+        onConfirm={(id) => {
+          deleteTask(id);
+          setTaskToDelete(null);
+        }}
+        onCancel={() => setTaskToDelete(null)}
       />
-      <button onClick={handleAddTask}>Adicionar</button>
-
-      <div className="tab-buttons">
-        <button
-          className={activeTab === "all" ? "active" : ""}
-          onClick={() => setActiveTab("all")}
-        >
-          Todas
-        </button>
-        <button
-          className={activeTab === "active" ? "active" : ""}
-          onClick={() => setActiveTab("active")}
-        >
-          Ativas
-        </button>
-        <button
-          className={activeTab === "completed" ? "active" : ""}
-          onClick={() => setActiveTab("completed")}
-        >
-          Concluídas
-        </button>
-      </div>
-
-      <ul>
-        {filteredTasks().map((task) => (
-          <li key={task.id} className="task-item">
-            <label>
-              <input
-                type="checkbox"
-                checked={task.done}
-                onChange={() => toggleTask(task)}
-              />
-              {task.done ? <s>{task.description}</s> : task.description}
-            </label>
-            <button
-              onClick={() => setTaskToDelete(task)}
-              className="delete-btn"
-              title="Excluir"
-            >
-              Deletar
-            </button>
-          </li>
-        ))}
-      </ul>
-
-      {taskToDelete && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <p>
-              Tem certeza que deseja excluir:{" "}
-              <strong>{taskToDelete.description}</strong>?
-            </p>
-            <div className="modal-buttons">
-              <button
-                onClick={() => {
-                  deleteTask(taskToDelete.id);
-                  setTaskToDelete(null);
-                }}
-                className="confirm"
-              >
-                Confirmar
-              </button>
-              <button onClick={() => setTaskToDelete(null)} className="cancel">
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -1,8 +1,8 @@
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useState } from "react";
-import { login } from "../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
-import "../styles/App.css";
+import { login } from "../features/auth/authSlice";
+import LoginForm from "../components/molecules/LoginForm";
 
 export default function LoginPage() {
   const dispatch = useDispatch();
@@ -21,24 +21,18 @@ export default function LoginPage() {
   }, [token]);
 
   return (
-    <div className="container">
-      <h2>Login</h2>
-      {error && <p className="error">{error}</p>}
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Senha"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button onClick={handleSubmit} disabled={loading}>
-        {loading ? "Entrando..." : "Entrar"}
-      </button>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="login-container">
+        <LoginForm
+          email={email}
+          setEmail={setEmail}
+          password={password}
+          setPassword={setPassword}
+          onSubmit={handleSubmit}
+          loading={loading}
+          error={error}
+        />
+      </div>
     </div>
   );
 }
